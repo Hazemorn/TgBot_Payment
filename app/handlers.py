@@ -12,7 +12,8 @@ from paypal.order import fun_create_order
 from paypal.payment import get_cap_url
 from paypal.payment import check_payment_pp
 
-from database.sqlite_db import add_new_user_db
+from database.sqlite_db import search_add_new_user_db
+
 
 import logging
 from common import configure_logging
@@ -86,15 +87,21 @@ async def verif_pay_vip(callback: CallbackQuery):
     if approve:
         #add a user to db
         user_data = await get_user_data(callback)
-        add_new_user_db(user_data)#tg_id, first_name, last_name, username, date)
+        search_add_new_user_db(user_data, 1)#tg_id, first_name, last_name, username, date)
         await callback.message.edit_text('Welcome to VIP club', reply_markup= kb.vip)
     else:
         await callback.message.edit_text('There is no payment', reply_markup= kb.novip)
 
 
-# @router.callback_query(F.data == '')
-# async def ff(callback: CallbackQuery):
-#     await callback.answer('')
+@router.callback_query(F.data == 'sub')
+async def ff(callback: CallbackQuery):
+    user_data = await get_user_data(callback)
+    is_present = search_add_new_user_db(user_data, 2)#tg_id, first_name, last_name, username, date)
+    if is_present:
+        await callback.message.edit_text('Welcome to VIP club', reply_markup= kb.vip)
+    else:
+        await callback.message.edit_text('You do not have a subscription.\nPlease buy a sub via the following methods:', reply_markup= kb.payment_type)
+   
 
 @router.callback_query(F.data == 'back_mm')
 async def back_fun(callback: CallbackQuery):

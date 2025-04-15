@@ -1,6 +1,6 @@
 import sqlite3
 
-def add_new_user_db(new_user_data): #tg_id, first_name, last_name, username, date):
+def search_add_new_user_db(new_user_data, type_add_or_search): #tg_id, first_name, last_name, username, date):
     connection =sqlite3.connect('vip_user.db')
 
     cursor = connection.cursor()
@@ -13,11 +13,24 @@ def add_new_user_db(new_user_data): #tg_id, first_name, last_name, username, dat
 
     cursor.execute('SELECT user_tg_id FROM vip_users WHERE user_tg_id = ?', (new_user_data[0],))
     existing_user = cursor.fetchone()
+    if type_add_or_search == 1: #add
+        if existing_user is None:  
+            cursor.execute("INSERT INTO vip_users(user_tg_id, first_name, last_name, username, date_of_added) VALUES (?, ?, ?, ?, ?)",
+                        (new_user_data[0], new_user_data[1], new_user_data[2], new_user_data[3], new_user_data[4]))
+            connection.commit()
+        connection.close()
+    elif type_add_or_search == 2:#search
+        if existing_user is None:  
+            connection.close()
+            return False
+        else:
+            connection.close()
+            return True
+    
 
-    if existing_user is None:  
-        cursor.execute("INSERT INTO vip_users(user_tg_id, first_name, last_name, username, date_of_added) VALUES (?, ?, ?, ?, ?)",
-                       (new_user_data[0], new_user_data[1], new_user_data[2], new_user_data[3], new_user_data[4]))
-        connection.commit()
-
-    connection.close()
+    
+        
+   
+    
+    
 
